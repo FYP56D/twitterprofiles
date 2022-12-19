@@ -46,7 +46,7 @@ import pandas
 def Userlist(Usernames1):
 
   Lines = Usernames1
-  print(Lines)
+  #print(Lines)
   L1=[]
   i=0
   z = len(Lines)-1
@@ -58,7 +58,7 @@ def Userlist(Usernames1):
         if x == 5 :
           L2 = [x[:-1] for x in L1]
           print(L2)
-          users_info = get_user_information(L2, headless=True)
+          users_info = get_user_information(L2, headless=False)
           L1.clear()
           L2.clear()
         if z == i :
@@ -67,52 +67,52 @@ def Userlist(Usernames1):
           i = i + 1
         x = x + 1
         
-  if L1 :
-    L2 = [x[:-1] for x in L1]
-    users_info = get_user_information(L2, headless=True)
-    L1.clear()
-    L2.clear()
-  Lines1 = []
-  for n in Lines:
-      Lines1.append(str(n))
+  # if L1 :
+  #   L2 = [x[:-1] for x in L1]
+  #   users_info = get_user_information(L2, headless=True)
+  #   L1.clear()
+  #   L2.clear()
+  # Lines1 = []
+  # for n in Lines:
+  #     Lines1.append(str(n))
 
-  #print(Lines1)
-  def Skipped_Users(Skipped):
-    z1=len(Skipped)
-    L11=[]
-    while (z1>i):
-      for x in range(4):
-  #     print(i)
-        L11.append(Lines[i])
-        if x == 3 :
-          L22 = [x[:-1] for x in L1]
-          users_info = get_user_information(L22, headless=True)
-          L11.clear()
-          L22.clear()
-        if z1 == i :
-          break
-        if z1 > i:   
-          i = i + 1
-        x = x + 1
-    return 0    
+  # #print(Lines1)
+  # def Skipped_Users(Skipped):
+  #   z1=len(Skipped)
+  #   L11=[]
+  #   while (z1>i):
+  #     for x in range(4):
+  # #     print(i)
+  #       L11.append(Lines[i])
+  #       if x == 3 :
+  #         L22 = [x[:-1] for x in L1]
+  #         users_info = get_user_information(L22, headless=True)
+  #         L11.clear()
+  #         L22.clear()
+  #       if z1 == i :
+  #         break
+  #       if z1 > i:   
+  #         i = i + 1
+  #       x = x + 1
+  #   return 0    
       
 
 
-  b=0
-  Skipped = []
-  data = pandas.read_csv("Profiles/Profiles.csv", header=0, encoding="utf-8")
-  csvfile = list(data.User_Name)
-  print(csvfile,"CSV FILE")
-  for b in range(z):
-    L3 = [x[:-1] for x in Lines1]
-    if L3[b] in csvfile:
-      print("Yes : ",L3[b])
-    if L3[b] not in csvfile:
-      print("Not : ", L3[b])  
-      Skipped.append(L3[b])
-    b+=1
-  print(Skipped)  
-  ad =Skipped_Users(Skipped)
+  # b=0
+  # Skipped = []
+  # data = pandas.read_csv("Profiles/Profiles.csv", header=0, encoding="utf-8")
+  # csvfile = list(data.User_Name)
+  # print(csvfile,"CSV FILE")
+  # for b in range(z):
+  #   L3 = [x[:-1] for x in Lines1]
+  #   if L3[b] in csvfile:
+  #     print("Yes : ",L3[b])
+  #   if L3[b] not in csvfile:
+  #     print("Not : ", L3[b])  
+  #     Skipped.append(L3[b])
+  #   b+=1
+  # print(Skipped)  
+  # ad =Skipped_Users(Skipped)
 
 
 #print(z)        
