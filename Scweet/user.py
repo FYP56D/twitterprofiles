@@ -1,6 +1,7 @@
 import time
 import os
 import requests
+import json
 from Scweet import utils
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,17 +12,18 @@ import selenium
 from time import sleep
 import random
 import json
-import csv
+import csv 
+from csv import DictWriter
 import snscrape
 import snscrape.modules.twitter as sntwitter
 import pandas as pd
 path = 'C:\\Users\\ALI-NAQI\\Downloads\\chromedriver_win32 (1)\chromedriver.exe'
-browser = webdriver.Chrome(path)
-def get_user_information(users, driver=None, headless=True):
+#browser = webdriver.Chrome(path)
+def get_user_information(users ,driver=None, headless=True):
     """ get user information if the "from_account" argument is specified """
 
     driver = utils.init_driver(headless=True)
-    #users = ["@ImranKhanPTI"]
+    #users = ["@ImranKhanPTI","@elonmusk"]
     users_info = {}
 
     for i, user in enumerate(users):
@@ -30,12 +32,12 @@ def get_user_information(users, driver=None, headless=True):
         log_user_page(user, driver)
 
         if user is not None:
-            browser.get(f'https://twitter.com/{user}')
+            driver.get(f'https://twitter.com/{user}')
             
             try: 
-                followww  = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"/following")]/span[1]/span[1]')))
+                followww  = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"/following")]/span[1]/span[1]')))
             except Exception as e:
-                print("Account is protected")
+                print(f"{user}'s Account is protected or doesnot exist")
                 flag =1
                 continue
             try:
@@ -47,7 +49,7 @@ def get_user_information(users, driver=None, headless=True):
                     #'//a[contains(@href,"/following")]/span[1]/span[1]').text
                 following = follo.text
                 #follo = driver.find_element(By.XPATH, '//a[contains(@href,"/followers")]/span[1]/span[1]')
-                followers = WebDriverWait(driver, 10).until(
+                followers = WebDriverWait(driver, 2).until(
                     EC.presence_of_element_located((By.XPATH,'//a[contains(@href,"/followers")]/span[1]/span[1]'))).text
                 #followers = driver.find_element_by_xpath(
                     #'//a[contains(@href,"/followers")]/span[1]/span[1]').text
@@ -55,7 +57,7 @@ def get_user_information(users, driver=None, headless=True):
             except Exception as e:
                 print("------------")
                 if flag == 0:
-                    browser.get(f'https://twitter.com/{user}')
+                    driver.get(f'https://twitter.com/{user}')
                     print("e")
                 #following=""
                 #followers=""
@@ -74,6 +76,7 @@ def get_user_information(users, driver=None, headless=True):
                 # print(e)
                 desc = ""
             a = 0
+
             try:
                 join_date = driver.find_element_by_xpath(
                     '//div[contains(@data-testid,"UserProfileHeader_Items")]/span[3]').text
@@ -107,36 +110,70 @@ def get_user_information(users, driver=None, headless=True):
                         birthday = ""
                         location = ""
             try:
+                s = WebDriverWait(driver,2).until(EC.presence_of_element_located((By.XPATH,'//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/h2/div/div/div/div/span[2]')))
+                s1 = s.is_displayed()
+                if s1 is False:
+                    verification = f"{user} not verified"
+                else:
+                    verification = f"{user} verified"
+
+                #print(verification)
+            
+
                 tweetno = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/div").text
                 #tweetno = [int(s) for s in str.split(tweetno) if s.isdigit()]
                 #browser.get(f"https://twitter.com/{user}/likes")
                 #time.sleep(2)
                 #likes = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/div").text
                 
-                print(tweetno)
+                #print(tweetno)
                 #print(likes)
             except Exception as e:
                 print("Not found")
-            try: 
-                verified  = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, '//div[contains(@data-testid,"icon-verified")]' )))
+#            try: 
+#                verified  = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, '//div[contains(@data-testid,"icon-verified")]' )))
 
-                print("verified")
+#                print("verified")
+ #           except Exception as e:
+ #               print("Not verified")    
+            try:
+                Full_name = driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/h2/div/div/div/div/span[1]/span/span').text 
             except Exception as e:
-                print("Not verified")    
+                print ('cannot get name')
             try:
                 print("--------------- " + user + " information : ---------------")
-                #print("Following : ", following)
-                #print("Followers : ", followers)
-                #print("Location : ", location)
-                #print("Join date : ", join_date)
-                #print("Birth date : ", birthday)
-                #print("Description : ", desc)
-                #print("Website : ", website)
-                users_info[user] = [following, followers, join_date, birthday, location, website, desc]
-                Profiles_header = ['name', 'following', 'followers', 'location','join_date','birthday','bio','website']
-                Profiles_data = [ user , following , followers , location, join_date, birthday, desc, website, tweetno ]
+                print("Full Name : ", Full_name)
+                print("Following : ", following)
+                print("Followers : ", followers)
+                print("Location : ", location)
+                print("Join date : ", join_date)
+                print("Birth date : ", birthday)
+                print("Description : ", desc)
+                print("Description : ", tweetno)
+                print("Website : ", website)
+                print("Verification status: ", verification)
+                users_info[user] = [Full_name,user,following, followers, join_date, birthday, location, website, desc, tweetno, verification]
+                Profiles_header = ['Full-name','User-name', 'following', 'followers', 'location','join_date','birthday','bio','website','Tweet no ', 'verification']
+                Profiles_data = [ Full_name ,user , following , followers , location, join_date, birthday, desc, website, tweetno, verification ]
+                dict1 =  {'Full_name':Full_name, 'User-name':user, 'Following':following, 'Followers':followers, 'Location':location,'join-date':join_date,'birthday':birthday,'description':desc,'website':website,'tweetno':tweetno,'verification':verification}
+                #df = pd.DataFrame(dict1, index=[0]) 
+                #df.to_csv('Profiles1.csv' )                
+                with open('Profiles/Profiles.json', 'a') as file:
+                    #dictwriter_object = DictWriter(file, fieldnames=Profiles_header , delimiter=',')
+                    #dictwriter_object.writerow(dict1)
+                    #file.close()
+                    json.dump(dict1,file )
+    
+#                with open('Profiles/Profiles1.csv', 'w+', newline ='',encoding='utf-8') as file:
+ #                   is_header = not any(cell.isdigit() for cell in file[0])
+  #                  writer = csv.writer(file)
+   #                 if is_header == False:
+    #                    writer.writerow(Profiles_header)
+     #               writer.writerow(Profiles_data)
+                print("----------Data printed to CSV file")
             except Exception as e:
-                print(e)
+                print("Exception of writing To CSV File", e)
+
             try: 
                 # Creating list to append tweet data to
                 tweets_list1 = []
@@ -150,18 +187,11 @@ def get_user_information(users, driver=None, headless=True):
                 # Creating a dataframe from the tweets list above 
                 tweets_df1 = pd.DataFrame(tweets_list1, columns=['Datetime', 'Tweet Id', 'Text', 'Username'])
                 tweets_df1.to_csv(f'Tweets/{user}.csv', sep=',', index=False)
-
+                print("fetched tweets-------------------------")
                                 #os.system(f"snscrape --format '{content!r}' --max-results 100 twitter-search 'from:{user}'> {user}-tweets.json")
             except Exception as e:
-                print("--------")
-            with open('Profiles/Profiles.csv', 'a', encoding='utf') as file:
-                writer = csv.writer(file)
-                #writer.writerow(Profiles_header)
-                writer.writerow(Profiles_data)
-            if i == len(users) - 1:
-                driver.close()
-                driver.quit()
-                return users_info
+                print("-----cannot fetch tweets---")
+
             try:
                 #driver1 = uc.Chrome(use_subprocess = True )
                 #driver1.get(f"https://twitter.com/{user}/photo")
@@ -178,10 +208,15 @@ def get_user_information(users, driver=None, headless=True):
                 response = requests.get(URL2)
                 # 3. Open the response into a new file 
                 open(f"images/{user}-coverpic.png", "wb").write(response.content)
-                
+                print("fetched Images----------------")
             
             except Exception as e:
-                print("-------------------")
+                    print("Cannot fetch images")
+            if i == len(users) - 1:
+                driver.close()
+                driver.quit()
+                return users_info
+                print("-----picture not found--------------")
         else:
             print("You must specify the user")
             continue
