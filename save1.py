@@ -18,10 +18,13 @@ def enter_user():
     userr1 = input("enter username: ")
     browser = webdriver.Chrome(path)
     browser.get(f'https://twitter.com/search?q={userr1}&src=typed_query&f=user')
-
+    pyautogui.keyDown("ctrl")
+    pyautogui.press("r")
+    pyautogui.keyUp("ctrl")
+        
     #time.sleep(5)
 
-    for i in range(1,30):
+    for i in range(1,3):
         
         time.sleep(time1)
         pyautogui.keyDown("ctrl")
