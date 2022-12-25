@@ -3,7 +3,9 @@ import os
 import requests
 import json
 from Scweet import utils
+from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,17 +21,33 @@ import snscrape.modules.twitter as sntwitter
 import pandas as pd
 path = 'C:\\Users\\ALI-NAQI\\Downloads\\chromedriver_win32 (1)\chromedriver.exe'
 #browser = webdriver.Chrome(path)
+
 def get_user_information(users ,driver=None, headless=True):
     """ get user information if the "from_account" argument is specified """
-
-    driver = utils.init_driver(headless=True)
-    #users = ["@ImranKhanPTI","@elonmusk"]
+    try:
+        driver = utils.init_driver(headless=False)
+        driver.get('https://twitter.com/i/flow/login')
+        driver.implicitly_wait(3)
+        username = 'salinaqi57@outlook.com'
+        password = 'Jaguar@123'
+        elementID =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME,"text")))
+        elementID.send_keys(username)
+        elementID.send_keys(Keys.ENTER)
+        elementID= WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME,"password")))
+        elementID.send_keys(password)
+        elementID.send_keys(Keys.ENTER)
+        print('logged in successfully!!')
+        sleep(random.uniform(1, 2))
+    except Exception as e:
+        print('Error in Getting Login Page: ',e)
+    #    users = ["@ImranKhanPTI","@elonmusk"]
+    #
     users_info = {}
 
     for i, user in enumerate(users):
         flag = 0
 
-        log_user_page(user, driver)
+        #log_user_page(user, driver)
 
         if user is not None:
             driver.get(f'https://twitter.com/{user}')
@@ -113,10 +131,11 @@ def get_user_information(users ,driver=None, headless=True):
                 s = WebDriverWait(driver,2).until(EC.presence_of_element_located((By.XPATH,'//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/h2/div/div/div/div/span[2]')))
                 s1 = s.is_displayed()
                 if s1 is False:
-                    verification = f"{user} not verified"
+                    #verification = f"{user} not verified"
+                    verification = 0
                 else:
-                    verification = f"{user} verified"
-
+                  #verification = f"{user} verified"
+                  verification = 1  
                 #print(verification)
             
 
@@ -136,10 +155,32 @@ def get_user_information(users ,driver=None, headless=True):
 #                print("verified")
  #           except Exception as e:
  #               print("Not verified")    
+
             try:
                 Full_name = driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/h2/div/div/div/div/span[1]/span/span').text 
             except Exception as e:
                 print ('cannot get name')
+            try:
+                l = driver.find_element_by_xpath('//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/nav/div/div[2]/div/div[4]/a')
+                driver.execute_script("arguments[0].click();", l)
+                time.sleep(1)
+                favourite_counts = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,'//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div/div[2]/div/div'))).text
+                #print("favourite_counts: ",favourite_counts)       
+            except Exception as e:
+                print('Error getting Favourite counts: ',e)                
+            try:
+                
+                driver.get(f"https://twitter.com/{user}/lists")
+                list_count = 0
+                for i in range (1,20):
+                    try:
+                        s = WebDriverWait(driver,20).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/section/div/div/div[{i}]/div/div/div/div/div[1]/div[2]')))
+                        list_count = list_count + 1
+                    except Exception as e:
+                        #print(list_count)
+                        break                
+            except Exception as e:
+                print("Error Occured in Lists",e)    
             try:
                 print("--------------- " + user + " information : ---------------")
                 print("Full Name : ", Full_name)
@@ -151,18 +192,21 @@ def get_user_information(users ,driver=None, headless=True):
                 print("Description : ", desc)
                 print("Description : ", tweetno)
                 print("Website : ", website)
-                print("Verification status: ", verification)
+                print("Favourites_Count : ", favourite_counts)
+                print("List_Count : ", list_count)
+                print("Website : ", website)
+                print("Verification Status: ", verification)
                 users_info[user] = [Full_name,user,following, followers, join_date, birthday, location, website, desc, tweetno, verification]
                 Profiles_header = ['Full-name','User-name', 'following', 'followers', 'location','join_date','birthday','bio','website','Tweet no ', 'verification']
-                Profiles_data = [ Full_name ,user , following , followers , location, join_date, birthday, desc, website, tweetno, verification ]
-                dict1 =  {'Full_name':Full_name, 'User-name':user, 'Following':following, 'Followers':followers, 'Location':location,'join-date':join_date,'birthday':birthday,'description':desc,'website':website,'tweetno':tweetno,'verification':verification}
+                Profiles_data = [ Full_name ,user , following , followers , location, join_date, birthday, desc, website, tweetno, favourite_counts, verification ]
+                dict1 =  {'Full_name':Full_name, 'User-name':user, 'Following':following, 'Followers':followers, 'Location':location,'join-date':join_date,'birthday':birthday,'description':desc,'website':website,'tweetno':tweetno,'verification':verification, 'List_count':list_count}
                 #df = pd.DataFrame(dict1, index=[0]) 
                 #df.to_csv('Profiles1.csv' )                
                 with open('Profiles/Profiles.json', 'a') as file:
                     #dictwriter_object = DictWriter(file, fieldnames=Profiles_header , delimiter=',')
                     #dictwriter_object.writerow(dict1)
                     #file.close()
-                    json.dump(dict1,file )
+                    json.dump(Profiles_data,file )
     
 #                with open('Profiles/Profiles1.csv', 'w+', newline ='',encoding='utf-8') as file:
  #                   is_header = not any(cell.isdigit() for cell in file[0])
@@ -224,6 +268,7 @@ def get_user_information(users ,driver=None, headless=True):
 
 
 def log_user_page(user, driver, headless=True):
+    driver= utils.init_driver(headless=False)
     sleep(random.uniform(1, 2))
     driver.get('https://twitter.com/' + user)
     sleep(random.uniform(1, 2))
@@ -259,10 +304,13 @@ def hasNumbers(inputString):
     return any(char.isdigit() for char in inputString)
 
 def search(user):
+    driver = utils.init_driver(headless=True)
     driver.get(f"https://twitter.com/search?q={user}&src=typed_query&f=user")
     list_of_users_get = []
     for i in range(1,28):
         q = WebDriverWait(driver, 120).until(
                     EC.presence_of_element_located((By.XPATH, f'//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/section/div/div/div[{i}]/div/div/div/div/div[2]/div[1]/div[1]/div/div[2]/div/a/div/div/span')))
         print(q.text)
+#def loginpage():
+
   
