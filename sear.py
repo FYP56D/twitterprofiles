@@ -4,7 +4,7 @@ from save1 import enter_user
 import re
 
 def getbook():
-    bookname = "new.txt"
+    bookname = "bajwa.txt"
     bookFile = open(bookname, 'r',encoding="utf-8")
     bookString = bookFile.read()
     lowerBook = bookString.lower()
@@ -25,5 +25,5 @@ def Usernames():
     getList = listAllThe(book)
     getList = list(set(getList))
 
-    print (getList)
+    #print (getList)
     return getList
