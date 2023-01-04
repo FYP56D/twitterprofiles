@@ -17,3 +17,5 @@ csv
 snscrape
 snscrape.modules.twitter
 pandas
+nltk
+jellyfish
